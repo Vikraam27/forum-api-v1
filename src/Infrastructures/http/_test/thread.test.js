@@ -128,7 +128,7 @@ describe('/threads endpoint', () => {
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(400);
       expect(responseJson.status).toEqual('fail');
-      expect(responseJson.message).toEqual('Pesan apapun selama tidak kosong');
+      expect(responseJson.message).toEqual('tidak dapat membuat thread karena properti yang di butuhkan tidak ada');
     });
   });
 });
