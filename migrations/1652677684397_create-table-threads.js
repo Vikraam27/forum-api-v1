@@ -23,8 +23,10 @@ exports.up = (pgm) => {
       default: pgm.func('current_timestamp'),
     },
   });
+  pgm.addConstraint('threads', 'fk_threads.creator_username_users.username', 'FOREIGN KEY(creator_username) REFERENCES users(username) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('treads');
+  pgm.addConstraint('threads', 'fk_threads.creator_username_users.username');
+  pgm.dropTable('threads');
 };
