@@ -4,7 +4,7 @@ describe('AddCommentToThread entities', () => {
   it('should throw error when payload does not contain needed property', () => {
     // Arrange
     const payload = {
-      threadId: 'thread-123',
+      threadId: 1234,
       content: 'this is comment from new thread',
     };
 

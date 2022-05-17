@@ -2,6 +2,7 @@ const AddedThread = require('../../Domains/threads/entities/AddedThread');
 const AddedCommentToThread = require('../../Domains/threads/entities/AddedCommentToThread');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -57,6 +58,36 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       content: result.rows[0].comment,
       owner: result.rows[0].creator_username,
     });
+  }
+
+  async verifyThreadCommentAccess(data) {
+    const { commentId, owner } = data;
+
+    const query = {
+      text: 'SELECT creator_username FROM comments_thread WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
+
+    const { creator_username: commentOwner } = result.rows[0];
+
+    if (owner !== commentOwner) {
+      throw new AuthorizationError('anda tidak dapat menghapus resoucre ini');
+    }
+  }
+
+  async deleteThreadComment(commentId) {
+    const query = {
+      text: 'UPDATE comments_thread SET is_delete = true WHERE id = $1',
+      values: [commentId],
+    };
+
+    await this._pool.query(query);
   }
 }
 

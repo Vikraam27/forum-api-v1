@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class ThreadRepository {
   async addThread(data) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
@@ -8,6 +9,14 @@ class ThreadRepository {
   }
 
   async addCommentToThread(data) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async verifyThreadCommentAccess(commentId, owner) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async deleteThreadComment(commentId) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 }

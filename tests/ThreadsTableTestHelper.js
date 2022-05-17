@@ -22,8 +22,32 @@ const ThreadsTableTestHelper = {
     const result = await pool.query(query);
     return result.rows;
   },
+
+  async addCommentToThread({
+    id = 'comment-123', threadId = 'thread-123', owner = 'user-123', comment = 'this is comment',
+  }) {
+    const query = {
+      text: 'INSERT INTO comments_thread VALUES ($1, $2, $3, $4)',
+      values: [id, threadId, owner, comment],
+    };
+
+    await pool.query(query);
+  },
+
+  async findCommentById(commentId) {
+    const query = {
+      text: 'SELECT * FROM comments_thread WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows[0];
+  },
+
   async cleanTable() {
     await pool.query('DELETE FROM threads WHERE 1=1');
+    await pool.query('DELETE FROM comments_thread WHERE 1=1');
   },
 };
 
