@@ -296,7 +296,7 @@ describe('/threads endpoint', () => {
     });
   });
 
-  describe('when post /threads/{threadId}/comments/{commentId}', () => {
+  describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
     it('should be delete comment with status code 200', async () => {
       // Arrange
       const server = await createServer(container);
@@ -492,6 +492,219 @@ describe('/threads endpoint', () => {
       expect(response.statusCode).toEqual(404);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual('komentar tidak ditemukan');
+    });
+  });
+
+  describe('when POST /threads/{threadId}/comments/{commentId}/replies', () => {
+    it('should be add replies with status code 201', async () => {
+      // Arrange
+      const payload = {
+        content: 'this is replies',
+      };
+      const server = await createServer(container);
+      // add user
+      await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+          fullname: 'Vikram',
+        },
+      });
+
+      // get authentication
+      const requestAuth = await server.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+        },
+      });
+      const requestAuthJSON = JSON.parse(requestAuth.payload);
+
+      await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+        },
+        url: '/threads/thread-123/comments/comment-123/replies',
+        payload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(201);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.addedReply).toBeDefined();
+      expect(responseJson.data.addedReply.id).toBeDefined();
+      expect(responseJson.data.addedReply.content).toBeDefined();
+      expect(responseJson.data.addedReply.owner).toBeDefined();
+    });
+
+    it('should throw error when not passing access token', async () => {
+      // Arrange
+      const payload = {
+        content: 'this is replies',
+      };
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: '/threads/thread-123/comments/comment-123/replies',
+        payload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(401);
+      expect(responseJson.error).toEqual('Unauthorized');
+      expect(responseJson.message).toEqual('Missing authentication');
+    });
+
+    it('should be throw NotFoundError when thread is not exist', async () => {
+      // Arrange
+      const payload = {
+        content: 'this is replies',
+      };
+      const server = await createServer(container);
+      // add user
+      await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+          fullname: 'Vikram',
+        },
+      });
+
+      // get authentication
+      const requestAuth = await server.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+        },
+      });
+      const requestAuthJSON = JSON.parse(requestAuth.payload);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+        },
+        url: '/threads/thread-123/comments/comment-123/replies',
+        payload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('thread tidak ditemukan');
+    });
+
+    it('should be throw NotFoundError when comment is not exist', async () => {
+      // Arrange
+      const payload = {
+        content: 'this is replies',
+      };
+      const server = await createServer(container);
+      // add user
+      await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+          fullname: 'Vikram',
+        },
+      });
+
+      // get authentication
+      const requestAuth = await server.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+        },
+      });
+      const requestAuthJSON = JSON.parse(requestAuth.payload);
+      await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+        },
+        url: '/threads/thread-123/comments/comment-123/replies',
+        payload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('komentar tidak ditemukan');
+    });
+
+    it('should throw error with bad payload', async () => {
+      // Arrange
+      const payload = {
+        content: 123,
+      };
+      const server = await createServer(container);
+      // add user
+      await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+          fullname: 'Vikram',
+        },
+      });
+
+      // get authentication
+      const requestAuth = await server.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username: 'vikramaja',
+          password: 'secret',
+        },
+      });
+      const requestAuthJSON = JSON.parse(requestAuth.payload);
+
+      await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+        },
+        url: '/threads/thread-123/comments/comment-123/replies',
+        payload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(400);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('tidak dapat menambahkan reply pada komentar karena tipe data tidak sesuai');
     });
   });
 });

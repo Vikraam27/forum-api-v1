@@ -1,4 +1,5 @@
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
+const AddedReplies = require('../../Domains/threads/entities/AddedReplies');
 const AddedCommentToThread = require('../../Domains/threads/entities/AddedCommentToThread');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
@@ -88,6 +89,39 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     await this._pool.query(query);
+  }
+
+  async isCommentExist(commentId) {
+    const query = {
+      text: 'SELECT id FROM comments_thread WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
+  }
+
+  async addReplies(payload) {
+    const id = `reply-${this._idGenerator()}`;
+    const {
+      threadId, commentId, content, owner,
+    } = payload;
+
+    const query = {
+      text: 'INSERT INTO replies VALUES ($1, $2, $3, $4, $5) RETURNING id, comment, creator_username',
+      values: [id, threadId, commentId, owner, content],
+    };
+
+    const result = await this._pool.query(query);
+
+    return new AddedReplies({
+      id: result.rows[0].id,
+      content: result.rows[0].comment,
+      owner: result.rows[0].creator_username,
+    });
   }
 }
 

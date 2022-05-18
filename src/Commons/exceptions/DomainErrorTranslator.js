@@ -27,6 +27,10 @@ DomainErrorTranslator._directories = {
   'ADDED_COMMENT_TO_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan komentar pada thread karena tipe data tidak sesuai'),
   'DELETE_COMMENT_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menghapus komentar pada thread karena properti yang di butuhkan tidak ada'),
   'DELETE_COMMENT_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menghapus komentar pada thread karena tipe data tidak sesuai'),
+  'ADDED_REPLIES.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan reply pada komentar karena properti yang di butuhkan tidak ada'),
+  'ADDED_REPLIES.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan reply pada komentar karena tipe data tidak sesuai'),
+  'ADD_REPLIES.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan reply pada komentar karena tipe data tidak sesuai'),
+  'ADD_REPLIES.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan reply pada komentar karena properti yang di butuhkan tidak ada'),
 };
 
 module.exports = DomainErrorTranslator;

@@ -12,6 +12,9 @@ const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const AddCommentToThread = require('../../../Domains/threads/entities/AddCommentToThread');
 const AddedCommentToThread = require('../../../Domains/threads/entities/AddedCommentToThread');
 
+// add replies
+const AddedReplies = require('../../../Domains/threads/entities/AddedReplies');
+
 // Commons
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
@@ -193,6 +196,57 @@ describe('ThreadRepositoryPostgres', () => {
 
       const checkComment = await ThreadsTableTestHelper.findCommentById(data.commentId);
       expect(checkComment.is_delete).toEqual(true);
+    });
+  });
+
+  describe('isCommentExsist function', () => {
+    it('should throw NotFoundError when comment id is not exist', async () => {
+      // Arrange
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.isCommentExist('comment-xxxxxxx')).rejects.toThrowError(NotFoundError);
+    });
+
+    it('should not throw NotFoundError when comment id is exist', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ threadId: 'thread-123', owner: 'fakeUsername' });
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.isCommentExist('comment-123')).resolves.not.toThrowError(NotFoundError);
+    });
+  });
+
+  describe('addReplies function', () => {
+    it('should add replies', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await UsersTableTestHelper.addUser({ id: 'user-12345', username: 'vikramaja' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ threadId: 'thread-123', owner: 'fakeUsername' });
+      const addReplies = {
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+        content: 'this is replies from comment',
+        owner: 'vikramaja',
+      };
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      const addedReplies = await threadRepositoryPostgres.addReplies(addReplies);
+
+      // Assert
+      expect(addedReplies).toStrictEqual(new AddedReplies({
+        id: 'reply-123',
+        content: addReplies.content,
+        owner: addReplies.owner,
+      }));
     });
   });
 });

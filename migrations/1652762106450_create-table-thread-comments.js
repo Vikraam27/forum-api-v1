@@ -33,7 +33,7 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.addConstraint('comments_thread', 'fk_comments_thread.creator_username_users.username');
-  pgm.addConstraint('comments_thread', 'fk_comments_thread.thread_id_threads.id');
+  pgm.dropConstraint('comments_thread', 'fk_comments_thread.creator_username_users.username');
+  pgm.dropConstraint('comments_thread', 'fk_comments_thread.thread_id_threads.id');
   pgm.dropTable('comments_thread');
 };

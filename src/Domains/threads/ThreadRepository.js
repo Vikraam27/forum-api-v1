@@ -19,6 +19,14 @@ class ThreadRepository {
   async deleteThreadComment(commentId) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
+
+  async isCommentExist(commentId) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async addReplies(payload) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
 }
 
 module.exports = ThreadRepository;
