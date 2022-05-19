@@ -175,7 +175,9 @@ describe('ThreadRepositoryPostgres', () => {
       await expect(threadRepositoryPostgres.verifyThreadCommentAccess(data))
         .resolves.not.toThrowError(AuthorizationError);
     });
+  });
 
+  describe('deleteThreadComment function', () => {
     it('should update is_delete comment', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
@@ -247,6 +249,160 @@ describe('ThreadRepositoryPostgres', () => {
         content: addReplies.content,
         owner: addReplies.owner,
       }));
+    });
+  });
+
+  describe('verifyRepliesAccess function', () => {
+    it('should throw NotFoundError when replies is not exist', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'fakeUsername' });
+      const data = {
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+        replyId: 'reply-123',
+        owner: 'fakeUsername',
+      };
+
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.verifyRepliesAccess(data))
+        .rejects.toThrowError(NotFoundError);
+    });
+
+    it('should throw AuthorizationError when deleting reply that were not created by that user', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await UsersTableTestHelper.addUser({ id: 'user-12345', username: 'vikramaja' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
+      await ThreadsTableTestHelper.addReply({ owner: 'vikramaja' });
+      const data = {
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+        replyId: 'reply-123',
+        owner: 'fakeUsername',
+      };
+
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.verifyRepliesAccess(data))
+        .rejects.toThrowError(AuthorizationError);
+    });
+
+    it('should not throw AuthorizationError when deleting reply that created by that user', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await UsersTableTestHelper.addUser({ id: 'user-12345', username: 'vikramaja' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
+      await ThreadsTableTestHelper.addReply({ owner: 'vikramaja' });
+      const data = {
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+        replyId: 'reply-123',
+        owner: 'vikramaja',
+      };
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.verifyRepliesAccess(data))
+        .resolves.not.toThrowError(AuthorizationError);
+    });
+  });
+
+  describe('deleteReplies function', () => {
+    it('should update is_delete comment', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await UsersTableTestHelper.addUser({ id: 'user-12345', username: 'vikramaja' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
+      await ThreadsTableTestHelper.addReply({ owner: 'vikramaja' });
+      const data = {
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+        replyId: 'reply-123',
+        owner: 'vikramaja',
+      };
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.verifyThreadCommentAccess(data))
+        .resolves.not.toThrowError(AuthorizationError);
+      await threadRepositoryPostgres.deleteReplies(data.replyId);
+
+      const checkReply = await ThreadsTableTestHelper.findReplyByid(data.replyId);
+      expect(checkReply.is_delete).toEqual(true);
+    });
+  });
+
+  describe('getThreadById function', () => {
+    it('should throw not found error when thread id not found', async () => {
+      // Arrange
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.getThreadById('thread-xxxxxxx')).rejects.toThrowError(NotFoundError);
+    });
+
+    it('should return property correcly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action
+      const threadDetails = await threadRepositoryPostgres.getThreadById('thread-123');
+
+      // Assert
+      expect(threadDetails).toHaveProperty('id', 'thread-123');
+      expect(threadDetails).toHaveProperty('title', 'Hello new user');
+      expect(threadDetails).toHaveProperty('body', 'Welcome to new thread');
+      expect(threadDetails).toHaveProperty('username', 'fakeUsername');
+      expect(threadDetails).toHaveProperty('date');
+    });
+  });
+
+  describe('getCommentByThreadId function', () => {
+    it('should return property correcly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'fakeUsername' });
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action
+      const commentDetails = await threadRepositoryPostgres.getCommentByThreadId('thread-123');
+
+      // Assert
+      expect(commentDetails[0]).toHaveProperty('id', 'comment-123');
+      expect(commentDetails[0]).toHaveProperty('content', 'this is comment');
+      expect(commentDetails[0]).toHaveProperty('username', 'fakeUsername');
+      expect(commentDetails[0]).toHaveProperty('date');
+    });
+  });
+
+  describe('getRepliesByCommentId function', () => {
+    it('should return property correcly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ username: 'fakeUsername' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addCommentToThread({ owner: 'fakeUsername' });
+      await ThreadsTableTestHelper.addReply({ owner: 'fakeUsername' });
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action
+      const replies = await threadRepositoryPostgres.getRepliesByCommentId('comment-123');
+
+      // Assert
+      expect(replies[0]).toHaveProperty('id', 'reply-123');
+      expect(replies[0]).toHaveProperty('content', 'this is reply');
+      expect(replies[0]).toHaveProperty('username', 'fakeUsername');
+      expect(replies[0]).toHaveProperty('date');
     });
   });
 });

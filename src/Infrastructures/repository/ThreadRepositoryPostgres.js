@@ -4,6 +4,9 @@ const AddedCommentToThread = require('../../Domains/threads/entities/AddedCommen
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
+const ThreadDetails = require('../../Domains/threads/entities/ThreadDetails');
+const CommentDetails = require('../../Domains/threads/entities/CommentDetails');
+const RepliesDetails = require('../../Domains/threads/entities/RepliesDetails');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -122,6 +125,91 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       content: result.rows[0].comment,
       owner: result.rows[0].creator_username,
     });
+  }
+
+  async verifyRepliesAccess(payload) {
+    const { replyId, owner } = payload;
+
+    const query = {
+      text: 'SELECT creator_username FROM replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('reply tidak ditemukan');
+    }
+
+    const { creator_username: replyOwner } = result.rows[0];
+
+    if (owner !== replyOwner) {
+      throw new AuthorizationError('anda tidak dapat menghapus resoucre ini');
+    }
+  }
+
+  async deleteReplies(replyId) {
+    const query = {
+      text: 'UPDATE replies SET is_delete = true WHERE id = $1',
+      values: [replyId],
+    };
+
+    await this._pool.query(query);
+  }
+
+  async getThreadById(threadId) {
+    const query = {
+      text: 'SELECT * FROM threads WHERE id = $1',
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('thread tidak ditemukan');
+    }
+
+    return new ThreadDetails({
+      id: result.rows[0].id,
+      title: result.rows[0].title,
+      body: result.rows[0].body,
+      date: result.rows[0].created_at,
+      username: result.rows[0].creator_username,
+    });
+  }
+
+  async getCommentByThreadId(threadId) {
+    const query = {
+      text: `SELECT id, creator_username, comment, created_at, is_delete 
+      FROM comments_thread WHERE thread_id = $1 ORDER BY created_at`,
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows.map((comment) => (new CommentDetails({
+      ...comment,
+      username: comment.creator_username,
+      date: comment.created_at,
+      content: comment.comment,
+    })));
+  }
+
+  async getRepliesByCommentId(commentId) {
+    const query = {
+      text: `SELECT id, creator_username, comment, created_at, is_delete
+      FROM replies WHERE comment_id = $1 ORDER BY created_at`,
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows.map((reply) => (new RepliesDetails({
+      ...reply,
+      username: reply.creator_username,
+      date: reply.created_at,
+      content: reply.comment,
+    })));
   }
 }
 

@@ -31,6 +31,17 @@ DomainErrorTranslator._directories = {
   'ADDED_REPLIES.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan reply pada komentar karena tipe data tidak sesuai'),
   'ADD_REPLIES.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan reply pada komentar karena tipe data tidak sesuai'),
   'ADD_REPLIES.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan reply pada komentar karena properti yang di butuhkan tidak ada'),
+  'DELETE_REPLIES_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menghapus reply  karena properti yang di butuhkan tidak ada'),
+  'DELETE_REPLIES_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menghapus relpy karena tipe data tidak sesuai'),
+  'GET_THREAD_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
+  'GET_THREAD_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
+  'THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
+  'THREAD_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
+  'COMMENT_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
+  'COMMENT_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
+  'REPLIES_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
+  'REPLIES_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
+
 };
 
 module.exports = DomainErrorTranslator;
