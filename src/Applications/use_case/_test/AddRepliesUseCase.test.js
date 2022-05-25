@@ -54,7 +54,11 @@ describe('AddRepliesUseCase', () => {
     mockThreadRepository.isCommentExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockThreadRepository.addReplies = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedAddedReplies));
+      .mockImplementation(() => Promise.resolve(new AddedReplies({
+        id: 'thread-123',
+        content: useCasePayload.content,
+        owner: useCasePayload.owner,
+      })));
 
     /** creating use case instance */
     const addReplies = new AddRepliesUseCase({
