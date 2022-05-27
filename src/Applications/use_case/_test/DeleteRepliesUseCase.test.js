@@ -1,4 +1,6 @@
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
+const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const DeleteRepliesUseCase = require('../DeleteRepliesUseCase');
 
 describe('DeleteRepliesUseCase', () => {
@@ -41,20 +43,24 @@ describe('DeleteRepliesUseCase', () => {
 
     /** creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
+    const mockRepliesRepository = new ReplyRepository();
 
     /** mocking needed function */
     mockThreadRepository.isTreadExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.isCommentExist = jest.fn()
+    mockCommentRepository.isCommentExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.verifyRepliesAccess = jest.fn()
+    mockRepliesRepository.verifyRepliesAccess = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.deleteReplies = jest.fn()
+    mockRepliesRepository.deleteReplies = jest.fn()
       .mockImplementation(() => Promise.resolve());
 
     /** creating use case instance */
     const deleteRepliesUseCase = new DeleteRepliesUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      repliesRepository: mockRepliesRepository,
     });
 
     // Action
@@ -63,11 +69,11 @@ describe('DeleteRepliesUseCase', () => {
     // Assert
     expect(mockThreadRepository.isTreadExist)
       .toHaveBeenCalledWith(useCasePayload.threadId);
-    expect(mockThreadRepository.isCommentExist)
+    expect(mockCommentRepository.isCommentExist)
       .toHaveBeenCalledWith(useCasePayload.commentId);
-    expect(mockThreadRepository.verifyRepliesAccess)
+    expect(mockRepliesRepository.verifyRepliesAccess)
       .toHaveBeenCalledWith(useCasePayload);
-    expect(mockThreadRepository.deleteReplies)
+    expect(mockRepliesRepository.deleteReplies)
       .toHaveBeenCalledWith(useCasePayload.replyId);
   });
 });

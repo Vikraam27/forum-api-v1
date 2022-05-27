@@ -1,22 +1,40 @@
+const ThreadDetails = require('../../Domains/threads/entities/ThreadDetails');
+const CommentDetails = require('../../Domains/comments/entities/CommentDetails');
+const RepliesDetails = require('../../Domains/replies/entities/RepliesDetails');
+
 class GetThreadDetailsUseCase {
-  constructor({ threadRepository }) {
+  constructor({ threadRepository, commentRepository, repliesRepository }) {
     this._threadRepository = threadRepository;
+    this._commentRepository = commentRepository;
+    this._repliesRepository = repliesRepository;
   }
 
   async execute(threadId) {
     this._validatePayload(threadId);
     const thread = await this._threadRepository.getThreadById(threadId);
-    const threadComments = await this._threadRepository.getCommentByThreadId(threadId);
-    const replyByCommentId = await Promise.all(threadComments.map(async (data) => {
-      const replies = await this._threadRepository.getRepliesByCommentId(data.id);
+    const threadComments = await this._commentRepository.getCommentByThreadId(threadId);
+    const replyByThreadId = await this._repliesRepository.getRepliesByThreadId(threadId);
+    console.log(replyByThreadId);
+    const replyByCommentId = threadComments.map((data) => {
+      const replies = replyByThreadId.filter((reply) => reply.comment_id === data.id)
+        .map((reply) => (new RepliesDetails({
+          id: reply.id,
+          username: reply.creator_username,
+          date: reply.created_at,
+          content: reply.comment,
+          is_delete: reply.is_delete,
+        })));
+      console.log(replies);
+      return new CommentDetails({
+        ...data,
+        replies,
+      });
+    });
 
-      return { ...data, replies };
-    }));
-
-    return {
+    return new ThreadDetails({
       ...thread,
       comments: replyByCommentId,
-    };
+    });
   }
 
   _validatePayload(threadId) {

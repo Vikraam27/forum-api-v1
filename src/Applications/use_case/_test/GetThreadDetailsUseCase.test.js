@@ -1,8 +1,10 @@
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const GetThreadDetailsUseCase = require('../GetThreadDetailsUseCase');
 const ThreadDetails = require('../../../Domains/threads/entities/ThreadDetails');
-const CommentDetails = require('../../../Domains/threads/entities/CommentDetails');
-const RepliesDetails = require('../../../Domains/threads/entities/RepliesDetails');
+const CommentDetails = require('../../../Domains/comments/entities/CommentDetails');
+const RepliesDetails = require('../../../Domains/replies/entities/RepliesDetails');
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
+const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 
 describe('GetThreadDetailsUseCase', () => {
   it('should throw error when payload does not contain needed property', async () => {
@@ -25,59 +27,86 @@ describe('GetThreadDetailsUseCase', () => {
       .toThrowError('GET_THREAD_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
-  it('should orchestrating the get replies action correctly', async () => {
+  it('should orchestrating the get thread action correctly', async () => {
     const threadId = 'thread-123';
-    const commentId = 'comment-123';
-    const expectedThreadDetails = new ThreadDetails({
+    const expectedThreadDetailss = new ThreadDetails({
       id: 'thread-123',
       title: 'this is new thread',
       body: 'welcome to new thread',
       date: new Date('2022-05-18 20:05:10.376458'),
       username: 'fakeUsername',
+      comments: [
+        new CommentDetails({
+          id: 'comment-123',
+          username: 'dicoding',
+          date: new Date('2022-05-18 20:05:12.000967'),
+          content: 'NewComment content',
+          is_delete: false,
+          replies: [
+            new RepliesDetails({
+              id: 'reply-123',
+              username: 'dicoding',
+              date: new Date('2022-05-18 20:05:12.000967'),
+              content: 'NewReply content',
+              is_delete: false,
+            }),
+          ],
+        }),
+      ],
     });
-    const expectedCommentDetail = [
-      new CommentDetails({
-        id: 'comment-123',
-        username: 'dicoding',
-        date: new Date('2022-05-18 20:05:12.000967'),
-        content: 'NewComment content',
-        is_delete: false,
-      }),
-    ];
-    const expectedRepliesDetails = [
-      new RepliesDetails({
-        id: 'reply-123',
-        username: 'dicoding',
-        date: new Date('2022-05-18 20:05:12.000967'),
-        content: 'NewReply content',
-        is_delete: false,
-      }),
-    ];
     /** creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
+    const mockRepliesRepository = new ReplyRepository();
 
     /** mocking needed function */
     mockThreadRepository.getThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedThreadDetails));
-    mockThreadRepository.getCommentByThreadId = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedCommentDetail));
-    mockThreadRepository.getRepliesByCommentId = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedRepliesDetails));
+      .mockImplementation(() => Promise.resolve({
+        id: 'thread-123',
+        title: 'this is new thread',
+        body: 'welcome to new thread',
+        date: new Date('2022-05-18 20:05:10.376458'),
+        username: 'fakeUsername',
+      }));
+    mockCommentRepository.getCommentByThreadId = jest.fn()
+      .mockImplementation(() => Promise.resolve([
+        {
+          id: 'comment-123',
+          username: 'dicoding',
+          date: new Date('2022-05-18 20:05:12.000967'),
+          content: 'NewComment content',
+          is_delete: false,
+        },
+      ]));
+    mockRepliesRepository.getRepliesByThreadId = jest.fn()
+      .mockImplementation(() => Promise.resolve([
+        new RepliesDetails({
+          id: 'reply-123',
+          username: 'dicoding',
+          date: new Date('2022-05-18 20:05:12.000967'),
+          content: 'NewReply content',
+          is_delete: false,
+        }),
+      ]));
 
     /** creating use case instance */
     const getThreadDetailsUseCase = new GetThreadDetailsUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      repliesRepository: mockRepliesRepository,
     });
 
     // Action
-    await getThreadDetailsUseCase.execute(threadId);
+    const thread = await getThreadDetailsUseCase.execute(threadId);
 
     // Assert
+    console.log(thread);
+    expect(thread).toStrictEqual(expectedThreadDetailss);
     expect(mockThreadRepository.getThreadById)
       .toHaveBeenCalledWith(threadId);
-    expect(mockThreadRepository.getCommentByThreadId)
+    expect(mockCommentRepository.getCommentByThreadId)
       .toHaveBeenCalledWith(threadId);
-    expect(mockThreadRepository.getRepliesByCommentId)
-      .toHaveBeenCalledWith(commentId);
+    expect(mockRepliesRepository.getRepliesByThreadId)
+      .toHaveBeenCalledWith(threadId);
   });
 });

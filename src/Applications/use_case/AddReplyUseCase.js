@@ -1,13 +1,15 @@
 class AddRepliesUseCase {
-  constructor({ threadRepository }) {
+  constructor({ threadRepository, commentRepository, repliesRepository }) {
     this._threadRepository = threadRepository;
+    this._commentRepository = commentRepository;
+    this._repliesRepository = repliesRepository;
   }
 
   async execute(useCasePayload) {
     this._validatePayload(useCasePayload);
     await this._threadRepository.isTreadExist(useCasePayload.threadId);
-    await this._threadRepository.isCommentExist(useCasePayload.commentId);
-    return this._threadRepository.addReplies(useCasePayload);
+    await this._commentRepository.isCommentExist(useCasePayload.commentId);
+    return this._repliesRepository.addReplies(useCasePayload);
   }
 
   _validatePayload(payload) {

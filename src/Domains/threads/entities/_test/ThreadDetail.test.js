@@ -22,6 +22,7 @@ describe('ThreadDetails entitiy', () => {
       body: {},
       date: 2332344,
       username: [],
+      comments: 'string',
     };
 
     // Action and Assert
@@ -36,6 +37,7 @@ describe('ThreadDetails entitiy', () => {
       body: 'welcome to this thread',
       date: new Date('2022-05-18 20:05:12.000967'),
       username: 'fakeUsername',
+      comments: [],
     };
     // Action
     const threadDetails = new ThreadDetails(payload);
@@ -46,5 +48,6 @@ describe('ThreadDetails entitiy', () => {
     expect(threadDetails.body).toEqual(payload.body);
     expect(threadDetails.date).toEqual(new Date(payload.date).toISOString());
     expect(threadDetails.username).toEqual(payload.username);
+    expect(threadDetails.comments).toStrictEqual(payload.comments);
   });
 });

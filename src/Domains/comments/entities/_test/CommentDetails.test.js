@@ -21,6 +21,7 @@ describe('CommentDetails entitiy', () => {
       date: {},
       content: 'this is comment from thread',
       is_delete: 12455,
+      replies: 3331,
     };
 
     // Action and Assert
@@ -35,6 +36,7 @@ describe('CommentDetails entitiy', () => {
       date: new Date('2022-05-18 20:05:12.000967'),
       content: 'this is comment from thread',
       is_delete: true,
+      replies: [],
     };
     // Action
     const commentDetails = new CommentDetails(payload);
@@ -42,8 +44,9 @@ describe('CommentDetails entitiy', () => {
     // Assert
     expect(commentDetails.id).toEqual(payload.id);
     expect(commentDetails.username).toEqual(payload.username);
-    expect(commentDetails.date).toEqual(new Date(payload.date).toISOString());
+    expect(commentDetails.date).toEqual(payload.date.toISOString());
     expect(commentDetails.content).toEqual('**komentar telah dihapus**');
+    expect(commentDetails.replies).toEqual(payload.replies);
   });
 
   it('should return CommentDetails object correctly', () => {
@@ -54,6 +57,7 @@ describe('CommentDetails entitiy', () => {
       date: new Date('2022-05-18 20:05:12.000967'),
       content: 'this is comment from thread',
       is_delete: false,
+      replies: [],
     };
     // Action
 
@@ -61,7 +65,8 @@ describe('CommentDetails entitiy', () => {
     // Assert
     expect(commentDetails.id).toEqual(payload.id);
     expect(commentDetails.username).toEqual(payload.username);
-    expect(commentDetails.date).toEqual(new Date(payload.date).toISOString());
+    expect(commentDetails.date).toEqual(payload.date.toISOString());
     expect(commentDetails.content).toEqual(payload.content);
+    expect(commentDetails.replies).toEqual(payload.replies);
   });
 });
