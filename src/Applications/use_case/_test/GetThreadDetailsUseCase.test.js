@@ -80,13 +80,14 @@ describe('GetThreadDetailsUseCase', () => {
       ]));
     mockRepliesRepository.getRepliesByThreadId = jest.fn()
       .mockImplementation(() => Promise.resolve([
-        new RepliesDetails({
+        {
           id: 'reply-123',
-          username: 'dicoding',
-          date: new Date('2022-05-18 20:05:12.000967'),
-          content: 'NewReply content',
+          comment_id: 'comment-123',
+          creator_username: 'dicoding',
+          created_at: new Date('2022-05-18 20:05:12.000967'),
+          comment: 'NewReply content',
           is_delete: false,
-        }),
+        },
       ]));
 
     /** creating use case instance */
@@ -100,7 +101,6 @@ describe('GetThreadDetailsUseCase', () => {
     const thread = await getThreadDetailsUseCase.execute(threadId);
 
     // Assert
-    console.log(thread);
     expect(thread).toStrictEqual(expectedThreadDetailss);
     expect(mockThreadRepository.getThreadById)
       .toHaveBeenCalledWith(threadId);

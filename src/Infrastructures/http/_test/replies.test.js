@@ -6,8 +6,36 @@ const container = require('../../container');
 const createServer = require('../createServer');
 
 describe('/comments endpoint', () => {
+  let accessToken;
   afterAll(async () => {
     await pool.end();
+  });
+
+  beforeEach(async () => {
+    const server = await createServer(container);
+    // add user
+    await server.inject({
+      method: 'POST',
+      url: '/users',
+      payload: {
+        username: 'vikramaja',
+        password: 'secret',
+        fullname: 'Vikram',
+      },
+    });
+
+    // get authentication
+    const requestAuth = await server.inject({
+      method: 'POST',
+      url: '/authentications',
+      payload: {
+        username: 'vikramaja',
+        password: 'secret',
+      },
+    });
+    const authResponse = JSON.parse(requestAuth.payload);
+
+    accessToken = authResponse.data.accessToken;
   });
 
   afterEach(async () => {
@@ -23,27 +51,6 @@ describe('/comments endpoint', () => {
         content: 'this is replies',
       };
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
 
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
       await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
@@ -52,7 +59,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies',
         payload,
@@ -95,33 +102,11 @@ describe('/comments endpoint', () => {
         content: 'this is replies',
       };
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
-
       // Action
       const response = await server.inject({
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies',
         payload,
@@ -140,34 +125,13 @@ describe('/comments endpoint', () => {
         content: 'this is replies',
       };
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
 
       // Action
       const response = await server.inject({
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies',
         payload,
@@ -186,27 +150,6 @@ describe('/comments endpoint', () => {
         content: 123,
       };
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
 
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
       await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
@@ -215,7 +158,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies',
         payload,
@@ -232,27 +175,6 @@ describe('/comments endpoint', () => {
     it('should be delete replies with status code 200', async () => {
       // Arrange
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
 
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
       await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
@@ -262,7 +184,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies/reply-123',
       });
@@ -293,16 +215,6 @@ describe('/comments endpoint', () => {
     it('should throw error when deleting reply that are not created by that user', async () => {
       // Arrange
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
 
       await server.inject({
         method: 'POST',
@@ -314,17 +226,6 @@ describe('/comments endpoint', () => {
         },
       });
 
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
-
       await ThreadsTableTestHelper.addThread({ owner: 'fakeUsername' });
       await ThreadsTableTestHelper.addCommentToThread({ owner: 'fakeUsername' });
       await ThreadsTableTestHelper.addReply({ owner: 'fakeUsername' });
@@ -333,7 +234,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies/reply-123',
       });
@@ -348,33 +249,11 @@ describe('/comments endpoint', () => {
     it('should throw not found error when thread not exist', async () => {
       // Arrange
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
-
       // Action
       const response = await server.inject({
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-xxx/comments/comment-xxx/replies/reply-xxx',
       });
@@ -389,27 +268,6 @@ describe('/comments endpoint', () => {
     it('should throw not found error when comment not exist', async () => {
       // Arrange
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
 
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
 
@@ -417,7 +275,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-xxx/replies/reply-xxx',
       });
@@ -432,27 +290,6 @@ describe('/comments endpoint', () => {
     it('should throw not found error when reply not exist', async () => {
       // Arrange
       const server = await createServer(container);
-      // add user
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-          fullname: 'Vikram',
-        },
-      });
-
-      // get authentication
-      const requestAuth = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: {
-          username: 'vikramaja',
-          password: 'secret',
-        },
-      });
-      const requestAuthJSON = JSON.parse(requestAuth.payload);
 
       await ThreadsTableTestHelper.addThread({ owner: 'vikramaja' });
       await ThreadsTableTestHelper.addCommentToThread({ owner: 'vikramaja' });
@@ -461,7 +298,7 @@ describe('/comments endpoint', () => {
       const response = await server.inject({
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${requestAuthJSON.data.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         url: '/threads/thread-123/comments/comment-123/replies/reply-xxx',
       });
