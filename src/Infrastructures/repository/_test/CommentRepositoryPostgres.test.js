@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const pool = require('../../database/postgres/pool');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
@@ -37,7 +36,8 @@ describe('CommentRepositoryPostgres', () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const addedCommentToThread = await commentRepositoryPostgres.addCommentToThread(addCommentToThread);
+      const addedCommentToThread = await commentRepositoryPostgres
+        .addCommentToThread(addCommentToThread);
 
       // Assert
       expect(addedCommentToThread).toStrictEqual(new AddedCommentToThread({

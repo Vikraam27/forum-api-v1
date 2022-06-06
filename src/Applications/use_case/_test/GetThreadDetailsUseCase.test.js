@@ -5,6 +5,7 @@ const CommentDetails = require('../../../Domains/comments/entities/CommentDetail
 const RepliesDetails = require('../../../Domains/replies/entities/RepliesDetails');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 
 describe('GetThreadDetailsUseCase', () => {
   it('should throw error when payload does not contain needed property', async () => {
@@ -42,6 +43,7 @@ describe('GetThreadDetailsUseCase', () => {
           date: new Date('2022-05-18 20:05:12.000967'),
           content: 'NewComment content',
           is_delete: false,
+          likeCount: 1,
           replies: [
             new RepliesDetails({
               id: 'reply-123',
@@ -58,6 +60,7 @@ describe('GetThreadDetailsUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockRepliesRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** mocking needed function */
     mockThreadRepository.getThreadById = jest.fn()
@@ -89,12 +92,20 @@ describe('GetThreadDetailsUseCase', () => {
           is_delete: false,
         },
       ]));
+    mockLikeRepository.getLikeCountByThreadId = jest.fn()
+      .mockImplementation(() => Promise.resolve([
+        {
+          comment_id: 'comment-123',
+          like_count: 1,
+        },
+      ]));
 
     /** creating use case instance */
     const getThreadDetailsUseCase = new GetThreadDetailsUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       repliesRepository: mockRepliesRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -107,6 +118,8 @@ describe('GetThreadDetailsUseCase', () => {
     expect(mockCommentRepository.getCommentByThreadId)
       .toHaveBeenCalledWith(threadId);
     expect(mockRepliesRepository.getRepliesByThreadId)
+      .toHaveBeenCalledWith(threadId);
+    expect(mockLikeRepository.getLikeCountByThreadId)
       .toHaveBeenCalledWith(threadId);
   });
 });
