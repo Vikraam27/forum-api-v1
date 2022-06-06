@@ -41,6 +41,8 @@ DomainErrorTranslator._directories = {
   'COMMENT_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
   'REPLIES_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
   'REPLIES_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
+  'LIKE_COMMENT_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menampilkan detail thread karena properti yang di butuhkan tidak ada'),
+  'LIKE_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menampilkan detail thread karena tipe data tidak sesuai'),
 
 };
 

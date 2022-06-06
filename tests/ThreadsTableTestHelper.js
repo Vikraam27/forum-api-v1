@@ -85,10 +85,31 @@ const ThreadsTableTestHelper = {
     await pool.query(query);
   },
 
+  async findLikedComment(username, commentId) {
+    const query = {
+      text: 'SELECT comment_id, owner FROM likes WHERE comment_id = $1 AND owner = $2',
+      values: [commentId, username],
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows;
+  },
+
+  async addLike({ id = 'like-123', owner = 'user-123', commentId = 'comment-123' }) {
+    const query = {
+      text: 'INSERT INTO likes VALUES ($1, $2, $3)',
+      values: [id, commentId, owner],
+    };
+
+    await pool.query(query);
+  },
+
   async cleanTable() {
     await pool.query('DELETE FROM threads WHERE 1=1');
     await pool.query('DELETE FROM comments_thread WHERE 1=1');
     await pool.query('DELETE FROM replies WHERE 1=1');
+    await pool.query('DELETE FROM likes  WHERE 1=1');
   },
 };
 

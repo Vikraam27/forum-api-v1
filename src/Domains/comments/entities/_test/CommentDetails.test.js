@@ -22,6 +22,7 @@ describe('CommentDetails entitiy', () => {
       content: 'this is comment from thread',
       is_delete: 12455,
       replies: 3331,
+      likeCount: 'vikram',
     };
 
     // Action and Assert
@@ -37,6 +38,7 @@ describe('CommentDetails entitiy', () => {
       content: 'this is comment from thread',
       is_delete: true,
       replies: [],
+      likeCount: 0,
     };
     // Action
     const commentDetails = new CommentDetails(payload);
@@ -47,6 +49,7 @@ describe('CommentDetails entitiy', () => {
     expect(commentDetails.date).toEqual(payload.date.toISOString());
     expect(commentDetails.content).toEqual('**komentar telah dihapus**');
     expect(commentDetails.replies).toEqual(payload.replies);
+    expect(commentDetails.likeCount).toEqual(payload.likeCount);
   });
 
   it('should return CommentDetails object correctly', () => {
@@ -58,6 +61,7 @@ describe('CommentDetails entitiy', () => {
       content: 'this is comment from thread',
       is_delete: false,
       replies: [],
+      likeCount: 0,
     };
     // Action
 
@@ -67,6 +71,7 @@ describe('CommentDetails entitiy', () => {
     expect(commentDetails.username).toEqual(payload.username);
     expect(commentDetails.date).toEqual(payload.date.toISOString());
     expect(commentDetails.content).toEqual(payload.content);
+    expect(commentDetails.likeCount).toEqual(payload.likeCount);
     expect(commentDetails.replies).toEqual(payload.replies);
   });
 });

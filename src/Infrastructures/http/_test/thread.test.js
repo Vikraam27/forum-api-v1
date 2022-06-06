@@ -171,6 +171,7 @@ describe('/threads endpoint', () => {
       expect(responseJson.data.thread.comments[0].id).toEqual('comment-123');
       expect(responseJson.data.thread.comments[0].username).toBeDefined();
       expect(responseJson.data.thread.comments[0].date).toBeDefined();
+      expect(responseJson.data.thread.comments[0].likeCount).toEqual(0);
       expect(responseJson.data.thread.comments[0].content).toBeDefined();
       expect(responseJson.data.thread.comments[0].replies).toBeDefined();
       expect(responseJson.data.thread.comments[0].replies[0].id).toBeDefined();
