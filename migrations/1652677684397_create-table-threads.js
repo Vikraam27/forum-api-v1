@@ -16,6 +16,8 @@ exports.up = (pgm) => {
     creator_username: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'users(username)',
+      onDelete: 'CASCADE',
     },
     created_at: {
       type: 'timestamp',
@@ -23,10 +25,8 @@ exports.up = (pgm) => {
       default: pgm.func('current_timestamp'),
     },
   });
-  pgm.addConstraint('threads', 'fk_threads.creator_username_users.username', 'FOREIGN KEY(creator_username) REFERENCES users(username) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('threads', 'fk_threads.creator_username_users.username');
   pgm.dropTable('threads');
 };

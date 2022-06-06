@@ -8,10 +8,14 @@ exports.up = (pgm) => {
     thread_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'threads(id)',
+      onDelete: 'CASCADE',
     },
     creator_username: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'users(username)',
+      onDelete: 'CASCADE',
     },
     comment: {
       type: 'TEXT',
@@ -28,12 +32,8 @@ exports.up = (pgm) => {
       default: false,
     },
   });
-  pgm.addConstraint('comments_thread', 'fk_comments_thread.creator_username_users.username', 'FOREIGN KEY(creator_username) REFERENCES users(username) ON DELETE CASCADE');
-  pgm.addConstraint('comments_thread', 'fk_comments_thread.thread_id_threads.id', 'FOREIGN KEY(thread_id) REFERENCES threads(id) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('comments_thread', 'fk_comments_thread.creator_username_users.username');
-  pgm.dropConstraint('comments_thread', 'fk_comments_thread.thread_id_threads.id');
   pgm.dropTable('comments_thread');
 };
