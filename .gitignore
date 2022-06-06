@@ -5,4 +5,3 @@ config/database/test.json
 coverage
 .env
 forum-api-app-server.pem
-src/Interfaces/http/api/likes
